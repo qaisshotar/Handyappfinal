@@ -17,8 +17,7 @@ delaysplaSplashScreen();
      private void delaysplaSplashScreen() {
 
         // Completable.timer(5, TimeUnit.SECONDS,
-              //   AndroidSchedulers.mainThread());
-
+             //    Schedulers.trampoline());
                  }
 
 
