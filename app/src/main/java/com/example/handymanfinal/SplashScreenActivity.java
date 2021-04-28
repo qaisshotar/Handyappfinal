@@ -17,8 +17,6 @@ import com.example.handymanfinal.Model.WorkerInfoModel;
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -28,7 +26,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +34,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
  public class SplashScreenActivity extends AppCompatActivity {
 
@@ -104,8 +100,9 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
                      public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                          if(dataSnapshot.exists()){
 
-                             Toast.makeText(SplashScreenActivity.this, "user already register", Toast.LENGTH_SHORT).show();
-
+                             //Toast.makeText(SplashScreenActivity.this, "user already register", Toast.LENGTH_SHORT).show();
+                         WorkerInfoModel workerInfoModel = dataSnapshot.getValue(WorkerInfoModel.class);
+                                goToHomeActivity(workerInfoModel);
                          }
                          else {
                              showRegisterLayout();
@@ -120,6 +117,12 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
                      }
                  });
 
+     }
+
+     private void goToHomeActivity(WorkerInfoModel workerInfoModel) {
+         Common.currentUser = workerInfoModel;
+         startActivity(new Intent(SplashScreenActivity.this,WotkerhomeActivity.class));
+         finish();
      }
 
      private void showRegisterLayout() {
@@ -177,6 +180,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
                             .addOnSuccessListener(aVoid -> {
                                 Toast.makeText(this, "Register Succesfully", Toast.LENGTH_SHORT).show();
                                 dialog.dismiss();
+                                goToHomeActivity(model);
 
                             });
                 }
