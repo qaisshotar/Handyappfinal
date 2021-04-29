@@ -30,6 +30,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.material.snackbar.Snackbar;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -40,14 +41,12 @@ import com.karumi.dexter.listener.single.PermissionListener;
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-
-
     private HomeViewModel homeViewModel;
-
-    private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
+    private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationCallback locationCallback;
     SupportMapFragment mapFragment;
+
 
     @Override
     public void onDestroy() {
@@ -55,45 +54,58 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         super.onDestroy();
     }
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        //here
-        init();
-        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        return root;
+
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
-    private void init() {
-        locationCallback = new LocationCallback();
-        locationRequest.setSmallestDisplacement(10f);
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(3000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_home, container, false);
+
+
+       init();
+       mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+       mapFragment.getMapAsync(this);
+        return root;
+   }
+
+  private void init() {
+       locationRequest= new LocationRequest();
+       locationRequest.setSmallestDisplacement(10f);
+       locationRequest.setInterval(50000);
+       locationRequest.setFastestInterval(3000);
+       locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+       
+
 
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                LatLng newposition = new LatLng(locationResult.getLastLocation().getLatitude(),
-                        locationResult.getLastLocation().getLatitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newposition, 18f));
+                if (locationResult != null) {
+                    LatLng newposition = new LatLng(locationResult.getLastLocation().getLatitude(),
+                            locationResult.getLastLocation().getLatitude());
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newposition, 18f));
+                    Toast.makeText(getContext(), "Location "+newposition, Toast.LENGTH_SHORT).show();
+
+                } else{
+                   Snackbar.make(mapFragment.getView(), "Location Null!", Snackbar.LENGTH_LONG).show();
+
+                }
             }
 
 
         };
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
             return;
         }
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
@@ -105,58 +117,45 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         mMap = googleMap;
 
-        Dexter.withContext(getContext())
+                Dexter.withContext(getContext())
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                 .withListener(new PermissionListener() {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            // TODO: Consider calling
-                            //    ActivityCompat#requestPermissions
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for ActivityCompat#requestPermissions for more details.
+                        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
                             return;
                         }
                         mMap.setMyLocationEnabled(true);
                         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                        mMap.setOnMyLocationButtonClickListener(() -> {
 
-                            @Override
-                            public boolean onMyLocationButtonClick() {
+                            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-                                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                                    // TODO: Consider calling
-                                    //    ActivityCompat#requestPermissions
-                                    // here to request the missing permissions, and then overriding
-                                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                    //                                          int[] grantResults)
-                                    // to handle the case where the user grants the permission. See the documentation
-                                    // for ActivityCompat#requestPermissions for more details.
-                                    return true;
-                                }
-                                fusedLocationProviderClient.getLastLocation()
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Toast.makeText(getContext(), "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                            fusedLocationProviderClient.getLastLocation()
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(getContext(), "a" + e.getMessage(), Toast.LENGTH_SHORT).show();
 
-                                            }
-                                        })
-                                        .addOnSuccessListener(location -> {
-                                            LatLng userlating = new LatLng(location.getLatitude(), location.getLatitude());
-                                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userlating, 18f));
-                                        });
-                             return true;
-                         }
+                                        }
+                                    })
+                                    .addOnSuccessListener(location -> {
+                                        LatLng userlating = new LatLng(location.getLatitude(), location.getLatitude());
+                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userlating, 18f));
+
+                                    });
+                         return true;
                      });
-                     View locationbutton = ((View)mapFragment.getView().findViewById(Integer.parseInt("1"))
+                        View locationbutton = ((View)mapFragment.getView().findViewById(Integer.parseInt("1"))
                              .getParent()).findViewById(Integer.parseInt("2"));
 
                         RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams)locationbutton.getLayoutParams();;
                         params.addRule(RelativeLayout.ALIGN_PARENT_TOP,0);
+                        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,RelativeLayout.TRUE);
                         params.setMargins(0,0,0,50);
 
                     }

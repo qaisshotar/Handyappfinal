@@ -235,7 +235,7 @@ import io.reactivex.rxjava3.core.Completable;
 
              else 
              {
-                 Toast.makeText(this, "[ERORR]:"+response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "[ERORR]:"+response.getError().getMessage(), Toast.LENGTH_SHORT).show();
                  
              }
          }
