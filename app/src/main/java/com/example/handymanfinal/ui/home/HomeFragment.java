@@ -29,7 +29,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -75,12 +74,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
    }
 
   private void init() {
-       locationRequest= new LocationRequest();
+       locationRequest= LocationRequest.create();
        locationRequest.setSmallestDisplacement(10f);
        locationRequest.setInterval(50000);
        locationRequest.setFastestInterval(3000);
        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-       
+
 
 
         locationCallback = new LocationCallback() {
@@ -136,13 +135,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                 return false;
                             }
                             fusedLocationProviderClient.getLastLocation()
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(getContext(), "a" + e.getMessage(), Toast.LENGTH_SHORT).show();
-
-                                        }
-                                    })
+                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "not shown" + e.getMessage(), Toast.LENGTH_SHORT).show())
                                     .addOnSuccessListener(location -> {
                                         LatLng userlating = new LatLng(location.getLatitude(), location.getLatitude());
                                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userlating, 18f));
