@@ -3,6 +3,8 @@ package com.example.handymanfinal.ui.home;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -29,6 +31,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -37,14 +40,14 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-public class HomeFragment extends Fragment implements OnMapReadyCallback {
+public class HomeFragment extends Fragment implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap mMap;
     private HomeViewModel homeViewModel;
     private LocationRequest locationRequest;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationCallback locationCallback;
-    SupportMapFragment mapFragment;
+    private SupportMapFragment mapFragment;
 
 
     @Override
@@ -76,8 +79,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
   private void init() {
        locationRequest= LocationRequest.create();
        locationRequest.setSmallestDisplacement(10f);
-       locationRequest.setInterval(50000);
-       locationRequest.setFastestInterval(3000);
+       locationRequest.setInterval(10);
+       locationRequest.setFastestInterval(10);
        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
 
@@ -89,7 +92,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 if (locationResult != null) {
                     LatLng newposition = new LatLng(locationResult.getLastLocation().getLatitude(),
                             locationResult.getLastLocation().getLatitude());
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newposition, 18f));
+                    Location location = new Location(locationResult.getLastLocation().getProvider());
+                    location.setLatitude(locationResult.getLastLocation().getLatitude());
+                    location.setLongitude(locationResult.getLastLocation().getLongitude());
+                    onLocationChanged(location);
                     Toast.makeText(getContext(), "Location "+newposition, Toast.LENGTH_SHORT).show();
 
                 } else{
@@ -112,6 +118,25 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
+    public void onLocationChanged(Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
+
+        mMap.setOnMyLocationButtonClickListener(() -> {
+
+            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
+            return true;
+        });
+
+        Toast.makeText(getContext(),"Location Changed",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
@@ -125,32 +150,19 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                 && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                             return;
+                        } else {
+                            mMap.setMyLocationEnabled(true);
+                            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                            View locationbutton = ((View) mapFragment.getView().findViewById(Integer.parseInt("1"))
+                                    .getParent()).findViewById(Integer.parseInt("2"));
+
+                            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) locationbutton.getLayoutParams();
+                            ;
+                            params.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+                            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+                            params.setMargins(0, 0, 0, 50);
+
                         }
-                        mMap.setMyLocationEnabled(true);
-                        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                        mMap.setOnMyLocationButtonClickListener(() -> {
-
-                            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                                return false;
-                            }
-                            fusedLocationProviderClient.getLastLocation()
-                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "not shown" + e.getMessage(), Toast.LENGTH_SHORT).show())
-                                    .addOnSuccessListener(location -> {
-                                        LatLng userlating = new LatLng(location.getLatitude(), location.getLatitude());
-                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userlating, 18f));
-
-                                    });
-                         return true;
-                     });
-                        View locationbutton = ((View)mapFragment.getView().findViewById(Integer.parseInt("1"))
-                             .getParent()).findViewById(Integer.parseInt("2"));
-
-                        RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams)locationbutton.getLayoutParams();;
-                        params.addRule(RelativeLayout.ALIGN_PARENT_TOP,0);
-                        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,RelativeLayout.TRUE);
-                        params.setMargins(0,0,0,50);
-
                     }
 
                     @Override
