@@ -3,6 +3,7 @@
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.handymanfinal.Model.WorkerInfoModel;
+import com.example.handymanfinal.Utils.UserUtils;
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -25,6 +27,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.Arrays;
 import java.util.List;
@@ -85,6 +88,14 @@ import io.reactivex.rxjava3.core.Completable;
              FirebaseUser user = myFirebaseAuth.getCurrentUser();
              if(user!=null)
              {
+                 FirebaseInstanceId.getInstance()
+                         .getInstanceId()
+                         .addOnFailureListener(e -> {
+                           Toast.makeText(SplashScreenActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }).addOnSuccessListener(instanceIdResult -> {
+                           Log.d("TOKEN",instanceIdResult.getToken() );
+                             UserUtils.updateToken(SplashScreenActivity.this,instanceIdResult.getToken());
+                         });
                  checkUserFromFirebase();
              }
              else
