@@ -170,17 +170,14 @@ registerOnlineSystem();
         markerOptions.position(latLng);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
 
-        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-            @Override
-            public boolean onMyLocationButtonClick() {
+        mMap.setOnMyLocationButtonClickListener(() -> {
 
-                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-                LatLng userlating = new LatLng(location.getLatitude(), location.getLatitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userlating, 18f));
-                return true;
+            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return false;
             }
+            LatLng userlating = new LatLng(location.getLatitude(), location.getLatitude());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userlating, 18f));
+            return true;
         });
 
         Toast.makeText(getContext(),"Location Changed",Toast.LENGTH_SHORT).show();

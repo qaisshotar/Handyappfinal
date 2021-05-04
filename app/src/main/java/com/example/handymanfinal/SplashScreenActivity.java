@@ -88,16 +88,18 @@ import io.reactivex.rxjava3.core.Completable;
              FirebaseUser user = myFirebaseAuth.getCurrentUser();
              if(user!=null)
              {
-                 FirebaseInstanceId.getInstance()
-                         .getInstanceId()
+
+
+                 FirebaseInstanceId.getInstance().getInstanceId()
                          .addOnFailureListener(e -> {
-                           Toast.makeText(SplashScreenActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }).addOnSuccessListener(instanceIdResult -> {
-                           Log.d("TOKEN",instanceIdResult.getToken() );
-                             UserUtils.updateToken(SplashScreenActivity.this,instanceIdResult.getToken());
-                         });
+                             Toast.makeText(SplashScreenActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                         }).addOnSuccessListener(instanceIdResult -> {
+                     Log.d("TOKEN",instanceIdResult.getToken() );
+                     UserUtils.updateToken(SplashScreenActivity.this,instanceIdResult.getToken());
+                 });
+
                  checkUserFromFirebase();
-             }
+         }
              else
                  showLoginLayout();
          };
@@ -111,7 +113,7 @@ import io.reactivex.rxjava3.core.Completable;
                      public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                          if(dataSnapshot.exists()){
 
-                             //Toast.makeText(SplashScreenActivity.this, "user already register", Toast.LENGTH_SHORT).show();
+                             Toast.makeText(SplashScreenActivity.this, "user already register", Toast.LENGTH_SHORT).show();
                          WorkerInfoModel workerInfoModel = dataSnapshot.getValue(WorkerInfoModel.class);
                                 goToHomeActivity(workerInfoModel);
                          }

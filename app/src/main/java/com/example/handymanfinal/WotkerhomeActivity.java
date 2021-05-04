@@ -112,7 +112,7 @@ private  StorageReference storageReference;
 
         txt_name.setText(Common.buildWelcomeMessage());
         txt_phone.setText(Common.currentUser !=null? Common.currentUser.getPhoneNumber():"");
-        txt_star.setText(Common.currentUser!=null? String.valueOf(Common.currentUser.getRating()):"0.0");
+        txt_star.setText(Common.currentUser!=null? String.valueOf(Common.currentUser. getRating()):"0.0");
 
 
 
