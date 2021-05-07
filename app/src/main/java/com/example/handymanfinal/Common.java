@@ -12,6 +12,10 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 
 import com.example.handymanfinal.Model.WorkerInfoModel;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Common {
@@ -20,6 +24,14 @@ public class Common {
     public static final String TOKEN_REFERENCE ="token" ;
     public static final String NOTI_TITLE = "title";
     public static final String NOTI_CONTENT ="body" ;
+
+
+
+    public static final String USER_ARIVE_LOCATION="ariveLocation" ;
+    public static final String USER_KEY ="UserKey" ;
+    public static final String REQUSET_WORKER_TITLE ="RequestWorker" ;
+
+
 
     public static WorkerInfoModel currentUser;
     public static String buildWelcomeMessage(){
@@ -79,4 +91,39 @@ public class Common {
     }
 
 
+    public static List< LatLng> decodepoly(String polyLine) {
+
+
+        List poly = new ArrayList();
+        int index=0,len= polyLine.length();
+        int lat=0,lng=0;
+        while(index < len)
+        {
+            int b,shift=0,result=0;
+            do{
+                b=polyLine.charAt(index++)-63;
+                result |= (b & 0x1f) << shift;
+                shift+=5;
+
+            }while(b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1):(result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do{
+                b = polyLine.charAt(index++)-63;
+                result |= (b & 0x1f) << shift;
+                shift +=5;
+            }while(b >= 0x20);
+            int dlng = ((result & 1)!=0 ? ~(result >> 1): (result >> 1));
+            lng +=dlng;
+
+            LatLng p = new LatLng((((double)lat / 1E5)),
+                    (((double)lng/1E5)));
+            poly.add(p);
+        }
+        return poly;
+
+    }
 }
